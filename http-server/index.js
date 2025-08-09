@@ -16,23 +16,26 @@ const friends = [
     {
         id: 2,
         name: 'Albert Einstein',
-    }
+    },
 ];
 
 server.on('request', (req, res) => {
     const items = req.url.split('/');
 
-    if(req.method === 'POST' && items[1] === 'friends') {
-        req.on('data', (data) => {
-            const friend = data.toString();
-            console.log('Request: ', friend);
-            friends.push(JSON.parse(friend));
-        })
-    } else if(req.method === 'GET' && items[1] === 'friends') {
+    if (req.method === 'POST' && items[1] === 'friends') {
+        let data = '';
+        req.on('data', (chunk) => {
+            data += chunk.toString();
+        });
+        req.on('end', () => {
+            console.log('Request:', data);
+            friends.push(JSON.parse(data));
+        });
+    } else if (req.method === 'GET' && items[1] === 'friends') {
         res.writeHead(200, {
             'Content-Type': 'application/json',
         });
-        if(items.length === 3) {
+        if (items.length === 3) {
             const friendIndex = Number(items[2]);
             res.end(JSON.stringify(friends[friendIndex]));
         } else {
@@ -58,4 +61,4 @@ server.on('request', (req, res) => {
 
 server.listen(PORT, () => {
     console.log(`Listenning on port ${PORT}...`);
-});//127.0.0.1 => localhost
+}); //127.0.0.1 => localhost
